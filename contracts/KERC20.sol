@@ -61,6 +61,46 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     }
 
     /*************************************************************************
+     *                  ERC1404 - KYC transfer restriction                   *
+     *************************************************************************/
+    uint8 internal constant _RESTRICTION_OK               = uint8(0);
+    uint8 internal constant _RESTRICTION_MISSING_KYC_FROM = uint8(0x01);
+    uint8 internal constant _RESTRICTION_MISSING_KYC_TO   = uint8(0x02);
+
+    function detectTransferRestriction(address from, address to, uint256)
+    public view virtual override returns (uint8)
+    {
+        // Allow non kyc to withdraw
+        // if (to == address(0)) return _RESTRICTION_OK;
+
+        // sender must be whitelisted or mint
+        if (from != address(0) && !isKYC(from))
+        {
+            return _RESTRICTION_MISSING_KYC_FROM;
+        }
+        // receiver must be whitelisted or burn
+        if (to != address(0) && !isKYC(to))
+        {
+            return _RESTRICTION_MISSING_KYC_TO;
+        }
+        return _RESTRICTION_OK;
+    }
+
+    function messageForTransferRestriction(uint8 restrictionCode)
+    public view virtual override returns (string memory)
+    {
+        if (restrictionCode == _RESTRICTION_MISSING_KYC_FROM)
+        {
+            return "Sender is missing KYC";
+        }
+        if (restrictionCode == _RESTRICTION_MISSING_KYC_TO)
+        {
+            return "Receiver is missing KYC";
+        }
+        revert("invalid-restriction-code");
+    }
+
+    /*************************************************************************
      *                       Escrow - public interface                       *
      *************************************************************************/
     function deposit(uint256 amount)
@@ -81,7 +121,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     external
     onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "only-admin")
     {
-        _mint(_msgSender(), SafeMath.sub(underlyingToken.balanceOf(address(this)),totalSupply()));
+        _mint(_msgSender(), SafeMath.sub(underlyingToken.balanceOf(address(this)), totalSupply()));
     }
 
     function receiveApproval(address sender, uint256 amount, address token, bytes calldata)
@@ -108,7 +148,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     function _deposit(address from, uint256 amount)
     internal
     {
-        require(amount > minDeposit, "deposit to small");
+        require(amount > minDeposit, "deposit-too-small");
         require(underlyingToken.transferFrom(from, address(this), amount), "failed-transferFrom");
     }
 
@@ -116,46 +156,6 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     internal
     {
         require(underlyingToken.transfer(to, amount), "failed-transfer");
-    }
-
-    /*************************************************************************
-     *                  ERC1404 - KYC transfer restriction                   *
-     *************************************************************************/
-    uint8 internal constant _RESTRICTION_OK               = uint8(0);
-    uint8 internal constant _RESTRICTION_MISSING_KYC_FROM = uint8(0x01);
-    uint8 internal constant _RESTRICTION_MISSING_KYC_TO   = uint8(0x02);
-
-    function detectTransferRestriction(address from, address to, uint256)
-    public view virtual override returns (uint8)
-    {
-        // Allow non kyc to withdraw
-        // if (to == address(0)) return _RESTRICTION_OK;
-
-        // sender must be whitelisted or mint
-        if (from != address(0) && !hasRole(KYC_MEMBER_ROLE, from))
-        {
-            return _RESTRICTION_MISSING_KYC_FROM;
-        }
-        // receiver must be whitelisted or burn
-        if (to != address(0) && !hasRole(KYC_MEMBER_ROLE, to))
-        {
-            return _RESTRICTION_MISSING_KYC_TO;
-        }
-        return _RESTRICTION_OK;
-    }
-
-    function messageForTransferRestriction(uint8 restrictionCode)
-    public view virtual override returns (string memory)
-    {
-        if (restrictionCode == _RESTRICTION_MISSING_KYC_FROM)
-        {
-            return "Sender is missing KYC";
-        }
-        if (restrictionCode == _RESTRICTION_MISSING_KYC_TO)
-        {
-            return "Receiver is missing KYC";
-        }
-        revert("invalid-restriction-code");
     }
 
     /*************************************************************************
