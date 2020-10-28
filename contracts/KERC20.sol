@@ -138,7 +138,15 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     external returns (bool)
     {
         approve(spender, amount);
-        require(TokenSpender(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused");
+        require(TokenSpender(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused-by-receiver");
+        return true;
+    }
+
+    function transferAndCall(address receiver, uint256 amount, bytes calldata data)
+    external returns (bool)
+    {
+        transfer(receiver, amount);
+        require(TokenSpender(receiver).onTokenTransfer(_msgSender(), amount, data), "transfer-refused-by-receiver");
         return true;
     }
 
