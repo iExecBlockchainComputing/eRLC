@@ -12,7 +12,7 @@ describe("KERC20", function () {
 
   beforeEach(async function () {
     this.rlc  = await RLC.new({ from: admin });
-    this.krlc = await KERC20.new(this.rlc.address, "iExec KRLC Token", "KRLC", [ kycadmin ], { from: admin });
+    this.krlc = await KERC20.new(this.rlc.address, "iExec KRLC Token", "KRLC", 0, [ kycadmin ], { from: admin });
 
     this.roles = {
       DEFAULT_ADMIN_ROLE: await this.krlc.DEFAULT_ADMIN_ROLE(),
@@ -57,7 +57,7 @@ describe("KERC20", function () {
           const from  = user1;
 
           await this.rlc.approve(this.krlc.address, this.value, { from });
-          await expectRevert(this.krlc.deposit(this.value, { from }), "missing-kyc");
+          await expectRevert(this.krlc.deposit(this.value, { from }), "Receiver is missing KYC");
         });
 
         it("with kyc", async function () {
@@ -80,7 +80,7 @@ describe("KERC20", function () {
         it("missing kyc", async function () {
           const from  = user1;
 
-          await expectRevert(this.rlc.approveAndCall(this.krlc.address, this.value, this.krlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from }), "missing-kyc");
+          await expectRevert(this.rlc.approveAndCall(this.krlc.address, this.value, this.krlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from }), "Receiver is missing KYC");
         });
 
         it("with kyc", async function () {
@@ -105,10 +105,10 @@ describe("KERC20", function () {
       });
 
       it("from missing kyc", async function () {
-        await expectRevert(this.krlc.transfer(kycuser1, this.value, { from: user1 }), "sender-missing-kyc");
+        await expectRevert(this.krlc.transfer(kycuser1, this.value, { from: user1 }), "Sender is missing KYC");
       });
       it("to missing kyc", async function () {
-        await expectRevert(this.krlc.transfer(user1, this.value, { from: kycuser1 }), "receiver-missing-kyc");
+        await expectRevert(this.krlc.transfer(user1, this.value, { from: kycuser1 }), "Receiver is missing KYC");
       });
       it("with kyc", async function () {
         const { tx } = await this.krlc.transfer(kycuser2, this.value, { from: kycuser1 })
@@ -141,13 +141,16 @@ describe("KERC20", function () {
         expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal("0");
         expect(await this.krlc.balanceOf(from)).to.be.bignumber.equal(this.value);
 
-        await this.krlc.grantRole(this.roles.KYC_MEMBER_ROLE, from, { from: kycadmin });
-        const { tx } = await this.krlc.withdraw(this.value, { from })
-        await expectEvent.inTransaction(tx, this.krlc, "Transfer", { from: from,              to: constants.ZERO_ADDRESS, value: this.value });
-        await expectEvent.inTransaction(tx, this.rlc,  "Transfer", { from: this.krlc.address, to: from,                   value: this.value });
+        await this.krlc.revokeRole(this.roles.KYC_MEMBER_ROLE, from, { from: kycadmin });
 
-        expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal(this.value);
-        expect(await this.krlc.balanceOf(from)).to.be.bignumber.equal("0");
+        await expectRevert(this.krlc.withdraw(this.value, { from }), 'Sender is missing KYC');
+
+        // const { tx } = await this.krlc.withdraw(this.value, { from })
+        // await expectEvent.inTransaction(tx, this.krlc, "Transfer", { from: from,              to: constants.ZERO_ADDRESS, value: this.value });
+        // await expectEvent.inTransaction(tx, this.rlc,  "Transfer", { from: this.krlc.address, to: from,                   value: this.value });
+
+        // expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+        // expect(await this.krlc.balanceOf(from)).to.be.bignumber.equal("0");
       });
     });
   });

@@ -7,7 +7,7 @@
     "compiler-version": ["error", "^0.7.0"],
     "private-vars-leading-underscore": "error",
     "reason-string": "off",
-		"func-visibility": ["error", { "ignoreConstructors": true }]
+    "func-visibility": ["error", { "ignoreConstructors": true }]
   }
 }
 

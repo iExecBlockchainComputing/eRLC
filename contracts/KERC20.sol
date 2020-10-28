@@ -2,15 +2,15 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./IERC1404.sol";
 import "./TokenSpender.sol";
 
 
-contract KERC20 is ERC20, AccessControl
+contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
 {
-    IERC20 public immutable underlyingToken;
-    bytes32 public constant KYC_ADMIN_ROLE = keccak256("KYC_ADMIN_ROLE");
+    bytes32 public constant KYC_ADMIN_ROLE  = keccak256("KYC_ADMIN_ROLE");
     bytes32 public constant KYC_MEMBER_ROLE = keccak256("KYC_MEMBER_ROLE");
 
     modifier onlyRole(bytes32 role, address member, string memory message)
@@ -19,20 +19,37 @@ contract KERC20 is ERC20, AccessControl
         _;
     }
 
-    constructor(address token, string memory name, string memory symbol, address[] memory kycAdmins)
+    IERC20  public immutable underlyingToken;
+    uint256 public immutable softCap;
+    bool    public softCapReached;
+    uint256 public minDeposit;
+
+    event MinDepositChanged(uint256 oldMinDeposit, uint256 newMinDeposit);
+    event SoftCapReached();
+
+    constructor(address token, string memory name, string memory symbol, uint256 softcap, address[] memory kycadmins)
     ERC20(name, symbol)
     {
         // configure token
         underlyingToken = IERC20(token);
         _setupDecimals(ERC20(token).decimals());
+        softCap = softcap;
         // configure roles
         _setRoleAdmin(KYC_MEMBER_ROLE, KYC_ADMIN_ROLE);
         // grant roles
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        for (uint256 i = 0; i < kycAdmins.length; ++i)
+        for (uint256 i = 0; i < kycadmins.length; ++i)
         {
-            _setupRole(KYC_ADMIN_ROLE, kycAdmins[i]);
+            _setupRole(KYC_ADMIN_ROLE, kycadmins[i]);
         }
+    }
+
+    function setMinDeposit(uint256 amount)
+    external virtual
+    onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "restricted-to-admin")
+    {
+        emit MinDepositChanged(minDeposit, amount);
+        minDeposit = amount;
     }
 
     /*************************************************************************
@@ -48,7 +65,6 @@ contract KERC20 is ERC20, AccessControl
      *************************************************************************/
     function deposit(uint256 amount)
     external
-    onlyRole(KYC_MEMBER_ROLE, _msgSender(), "account-missing-kyc")
     {
         _deposit(_msgSender(), amount);
         _mint(_msgSender(), amount);
@@ -70,7 +86,6 @@ contract KERC20 is ERC20, AccessControl
 
     function receiveApproval(address sender, uint256 amount, address token, bytes calldata)
     external
-    onlyRole(KYC_MEMBER_ROLE, sender, "sender-missing-kyc")
     returns (bool)
     {
         require(token == address(underlyingToken), "wrong-token");
@@ -93,24 +108,91 @@ contract KERC20 is ERC20, AccessControl
     function _deposit(address from, uint256 amount)
     internal
     {
-        require(underlyingToken.transferFrom(from, address(this), amount), "failled-transferFrom");
+        require(amount > minDeposit, "deposit to small");
+        require(underlyingToken.transferFrom(from, address(this), amount), "failed-transferFrom");
     }
 
     function _withdraw(address to, uint256 amount)
     internal
     {
-        require(underlyingToken.transfer(to, amount), "failled-transfer");
+        require(underlyingToken.transfer(to, amount), "failed-transfer");
+    }
+
+    /*************************************************************************
+     *                  ERC1404 - KYC transfer restriction                   *
+     *************************************************************************/
+    uint8 internal constant _RESTRICTION_OK               = uint8(0);
+    uint8 internal constant _RESTRICTION_MISSING_KYC_FROM = uint8(0x01);
+    uint8 internal constant _RESTRICTION_MISSING_KYC_TO   = uint8(0x02);
+
+    function detectTransferRestriction(address from, address to, uint256)
+    public view virtual override returns (uint8)
+    {
+        // Allow non kyc to withdraw
+        // if (to == address(0)) return _RESTRICTION_OK;
+
+        // sender must be whitelisted or mint
+        if (from != address(0) && !hasRole(KYC_MEMBER_ROLE, from))
+        {
+            return _RESTRICTION_MISSING_KYC_FROM;
+        }
+        // receiver must be whitelisted or burn
+        if (to != address(0) && !hasRole(KYC_MEMBER_ROLE, to))
+        {
+            return _RESTRICTION_MISSING_KYC_TO;
+        }
+        return _RESTRICTION_OK;
+    }
+
+    function messageForTransferRestriction(uint8 restrictionCode)
+    public view virtual override returns (string memory)
+    {
+        if (restrictionCode == _RESTRICTION_MISSING_KYC_FROM)
+        {
+            return "Sender is missing KYC";
+        }
+        if (restrictionCode == _RESTRICTION_MISSING_KYC_TO)
+        {
+            return "Receiver is missing KYC";
+        }
+        revert("invalid-restriction-code");
     }
 
     /*************************************************************************
      *                 ERC20 - alter behaviour to enable KYC                 *
      *************************************************************************/
     // Only allow transfer between KYC members
-    function _transfer(address sender, address recipient, uint256 amount)
-    internal override
-    onlyRole(KYC_MEMBER_ROLE, sender, "sender-missing-kyc")
-    onlyRole(KYC_MEMBER_ROLE, recipient, "receiver-missing-kyc")
+    function _beforeTokenTransfer(address from, address to, uint256 amount)
+    internal virtual override
     {
-        super._transfer(sender, recipient, amount);
+        uint8 restrictionCode = detectTransferRestriction(from, to, amount);
+        if (restrictionCode != _RESTRICTION_OK)
+        {
+            revert(messageForTransferRestriction(restrictionCode));
+        }
+        super._beforeTokenTransfer(from, to, amount);
+    }
+
+    // Check softcap
+    function _mint(address account, uint256 amount)
+    internal virtual override
+    {
+        super._mint(account, amount);
+        if (!softCapReached && totalSupply() >= softCap)
+        {
+            softCapReached = true;
+            emit SoftCapReached();
+        }
+    }
+
+    /*************************************************************************
+     *                             ERC20Snapshot                             *
+     *************************************************************************/
+    function snapshot()
+    external virtual
+    onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "restricted-to-admin")
+    returns (uint256)
+    {
+        return _snapshot();
     }
 }
