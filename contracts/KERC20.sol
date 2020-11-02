@@ -45,7 +45,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
     }
 
     function setMinDeposit(uint256 amount)
-    external virtual
+    external
     onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "restricted-to-admin")
     {
         emit MinDepositChanged(minDeposit, amount);
@@ -55,7 +55,8 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
     /*************************************************************************
      *                              Public view                              *
      *************************************************************************/
-    function isKYC(address account) public view returns (bool)
+    function isKYC(address account)
+    public view returns (bool)
     {
         return hasRole(KYC_MEMBER_ROLE, account);
     }
@@ -68,7 +69,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
     uint8 internal constant _RESTRICTION_MISSING_KYC_TO   = uint8(0x02);
 
     function detectTransferRestriction(address from, address to, uint256)
-    public view virtual override returns (uint8)
+    public view override returns (uint8)
     {
         // Allow non kyc to withdraw
         // if (to == address(0)) return _RESTRICTION_OK;
@@ -87,7 +88,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
     }
 
     function messageForTransferRestriction(uint8 restrictionCode)
-    public view virtual override returns (string memory)
+    public view override returns (string memory)
     {
         if (restrictionCode == _RESTRICTION_MISSING_KYC_FROM)
         {
@@ -204,7 +205,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
      *                             ERC20Snapshot                             *
      *************************************************************************/
     function snapshot()
-    external virtual
+    external
     onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "restricted-to-admin")
     returns (uint256)
     {
