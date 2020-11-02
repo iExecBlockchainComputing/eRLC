@@ -4,11 +4,11 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./IERC677.sol";
 import "./IERC1404.sol";
-import "./TokenSpender.sol";
 
 
-contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
+contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
 {
     bytes32 public constant KYC_ADMIN_ROLE  = keccak256("KYC_ADMIN_ROLE");
     bytes32 public constant KYC_MEMBER_ROLE = keccak256("KYC_MEMBER_ROLE");
@@ -125,8 +125,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     }
 
     function receiveApproval(address sender, uint256 amount, address token, bytes calldata)
-    external
-    returns (bool)
+    external override returns (bool)
     {
         require(token == address(underlyingToken), "wrong-token");
         _deposit(sender, amount);
@@ -138,7 +137,15 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     external returns (bool)
     {
         approve(spender, amount);
-        require(TokenSpender(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused-by-receiver");
+        require(IERC677(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused-by-receiver");
+        return true;
+    }
+
+    function onTokenTransfer(address sender, uint256 amount, bytes calldata)
+    external override returns (bool)
+    {
+        require(_msgSender() == address(underlyingToken), "wrong-sender");
+        _mint(sender, amount);
         return true;
     }
 
@@ -146,7 +153,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
     external returns (bool)
     {
         transfer(receiver, amount);
-        require(TokenSpender(receiver).onTokenTransfer(_msgSender(), amount, data), "transfer-refused-by-receiver");
+        require(IERC677(receiver).onTokenTransfer(_msgSender(), amount, data), "transfer-refused-by-receiver");
         return true;
     }
 
@@ -171,7 +178,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
      *************************************************************************/
     // Only allow transfer between KYC members
     function _beforeTokenTransfer(address from, address to, uint256 amount)
-    internal virtual override
+    internal override
     {
         uint8 restrictionCode = detectTransferRestriction(from, to, amount);
         if (restrictionCode != _RESTRICTION_OK)
@@ -183,7 +190,7 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC1404
 
     // Check softcap
     function _mint(address account, uint256 amount)
-    internal virtual override
+    internal override
     {
         super._mint(account, amount);
         if (!softCapReached && totalSupply() >= softCap)
