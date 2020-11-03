@@ -61,6 +61,84 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
         return hasRole(KYC_MEMBER_ROLE, account);
     }
 
+    function grantKYC(address[] calldata accounts)
+    external
+    {
+        for (uint256 i = 0; i < accounts.length; ++i)
+        {
+            grantRole(KYC_MEMBER_ROLE, accounts[i]);
+        }
+    }
+
+    function revokeKYC(address[] calldata accounts)
+    external
+    {
+        for (uint256 i = 0; i < accounts.length; ++i)
+        {
+            revokeRole(KYC_MEMBER_ROLE, accounts[i]);
+        }
+    }
+
+    /*************************************************************************
+     *                       Escrow - public interface                       *
+     *************************************************************************/
+    function deposit(uint256 amount)
+    external
+    {
+        _deposit(_msgSender(), amount);
+        _mint(_msgSender(), amount);
+    }
+
+    function withdraw(uint256 amount)
+    external
+    {
+        _burn(_msgSender(), amount);
+        _withdraw(_msgSender(), amount);
+    }
+
+    function recover()
+    external
+    onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "only-admin")
+    {
+        _mint(_msgSender(), SafeMath.sub(underlyingToken.balanceOf(address(this)), totalSupply()));
+    }
+
+    /*************************************************************************
+     *                ERC677 - One-transaction ERC20 deposits                *
+     *************************************************************************/
+    function receiveApproval(address sender, uint256 amount, address token, bytes calldata)
+    external override returns (bool)
+    {
+        require(token == address(underlyingToken), "wrong-token");
+        _deposit(sender, amount);
+        _mint(sender, amount);
+        return true;
+    }
+
+    function approveAndCall(address spender, uint256 amount, bytes calldata extraData)
+    external returns (bool)
+    {
+        approve(spender, amount);
+        require(IERC677(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused-by-receiver");
+        return true;
+    }
+
+    function onTokenTransfer(address sender, uint256 amount, bytes calldata)
+    external override returns (bool)
+    {
+        require(_msgSender() == address(underlyingToken), "wrong-sender");
+        _mint(sender, amount);
+        return true;
+    }
+
+    function transferAndCall(address receiver, uint256 amount, bytes calldata data)
+    external returns (bool)
+    {
+        transfer(receiver, amount);
+        require(IERC677(receiver).onTokenTransfer(_msgSender(), amount, data), "transfer-refused-by-receiver");
+        return true;
+    }
+
     /*************************************************************************
      *                  ERC1404 - KYC transfer restriction                   *
      *************************************************************************/
@@ -99,63 +177,6 @@ contract KERC20 is ERC20Snapshot, AccessControl, IERC677, IERC1404
             return "Receiver is missing KYC";
         }
         revert("invalid-restriction-code");
-    }
-
-    /*************************************************************************
-     *                       Escrow - public interface                       *
-     *************************************************************************/
-    function deposit(uint256 amount)
-    external
-    {
-        _deposit(_msgSender(), amount);
-        _mint(_msgSender(), amount);
-    }
-
-    function withdraw(uint256 amount)
-    external
-    {
-        _burn(_msgSender(), amount);
-        _withdraw(_msgSender(), amount);
-    }
-
-    function recover()
-    external
-    onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "only-admin")
-    {
-        _mint(_msgSender(), SafeMath.sub(underlyingToken.balanceOf(address(this)), totalSupply()));
-    }
-
-    function receiveApproval(address sender, uint256 amount, address token, bytes calldata)
-    external override returns (bool)
-    {
-        require(token == address(underlyingToken), "wrong-token");
-        _deposit(sender, amount);
-        _mint(sender, amount);
-        return true;
-    }
-
-    function approveAndCall(address spender, uint256 amount, bytes calldata extraData)
-    external returns (bool)
-    {
-        approve(spender, amount);
-        require(IERC677(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused-by-receiver");
-        return true;
-    }
-
-    function onTokenTransfer(address sender, uint256 amount, bytes calldata)
-    external override returns (bool)
-    {
-        require(_msgSender() == address(underlyingToken), "wrong-sender");
-        _mint(sender, amount);
-        return true;
-    }
-
-    function transferAndCall(address receiver, uint256 amount, bytes calldata data)
-    external returns (bool)
-    {
-        transfer(receiver, amount);
-        require(IERC677(receiver).onTokenTransfer(_msgSender(), amount, data), "transfer-refused-by-receiver");
-        return true;
     }
 
     /*************************************************************************
