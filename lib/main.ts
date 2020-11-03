@@ -17,12 +17,12 @@ const privatekey: string = process.env.MNEMONIC;
 	let provider: ethers.providers.Provider = ethers.getDefaultProvider(network);
 	let wallet:   ethers.Wallet             = new ethers.Wallet(privatekey, provider);
 	let contract: ethers.Contract           = new ethers.Contract(address, abi, wallet);
-	let entries:  string[]                  = [];
+	let entries:  string[]                  = new Array();
 
 	createInterface({
-		input: process.stdin,
-		output: process.stdout,
-		terminal: false
+		input:    process.stdin,
+		output:   process.stdout,
+		terminal: false,
 	})
 	.on('line', (entry) => {
 		entries.push(entry);
