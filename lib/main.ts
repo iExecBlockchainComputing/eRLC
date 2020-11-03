@@ -8,14 +8,10 @@ const { abi } = require('../build/contracts/KERC20.json');
 // ------------[ Configuration - Begin ]------------
 const network:    string = process.env.CHAIN || "goerli";
 const address:    string = process.env.PROXY || "erlc.iexec.eth";
-const privatekey: string = process.env.MNEMONIC1;
+const privatekey: string = process.env.MNEMONIC;
 // ------------[  Configuration - End  ]------------
 
 
-
-// RLC: 0xe0d00540a3729B4fdB96f92534dA97DC7973Af8b
-// ERLC: 0x739ce64780Ec594e7547338764cB22266d7dcd77
-// WALLET: 0xF037353a9B47f453d89E9163F21a2f6e1000B07d
 
 (async () => {
 	let provider: ethers.providers.Provider = ethers.getDefaultProvider(network);
