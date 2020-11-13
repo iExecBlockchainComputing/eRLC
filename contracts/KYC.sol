@@ -16,7 +16,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
@@ -33,6 +33,7 @@ abstract contract KYC is AccessControl
     }
 
     constructor(address[] memory admins, address[] memory kycadmins)
+    internal
     {
         _setRoleAdmin(KYC_MEMBER_ROLE, KYC_ADMIN_ROLE);
         for (uint256 i = 0; i < admins.length; ++i)

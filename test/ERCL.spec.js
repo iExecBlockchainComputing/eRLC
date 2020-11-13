@@ -165,7 +165,7 @@ describe("ERLCSwap", async function () {
     describe("recover & claim", async function () {
       beforeEach(async function () {
         const { tx } = await this.rlc.transfer(this.erlc.address, this.value, { from: kycuser1 });
-        await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: kycuser1, to: this.erlc.address, value: this.value });
+        await expectEvent.inTransaction(tx, this.rlc, "Transfer", { from: kycuser1, to: this.erlc.address, value: this.value });
       });
 
       it("recover", async function () {

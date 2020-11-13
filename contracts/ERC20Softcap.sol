@@ -16,7 +16,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -29,6 +29,7 @@ abstract contract ERC20Softcap is ERC20
     event SoftCapReached();
 
     constructor(uint256 softcap)
+    internal
     {
         softCap        = softcap;
         softCapReached = false;

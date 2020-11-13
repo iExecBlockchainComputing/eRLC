@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { ethers } from 'ethers';
 import { createInterface } from 'readline';
 
-const { abi } = require('../build/contracts/KERC20.json');
+const { abi } = require('../build/contracts/KYC.json');
 
 
 // ------------[ Configuration - Begin ]------------

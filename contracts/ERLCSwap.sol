@@ -16,7 +16,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.6.0;
 
 import "./interfaces/IERC677.sol";
 import "./ERLC.sol";
@@ -33,6 +33,7 @@ contract ERLCSwap is ERLC, IERC677Receiver
         uint256          softcap,
         address[] memory admins,
         address[] memory kycadmins)
+    public
     ERLC(name, symbol, softcap, admins, kycadmins)
     {
         underlyingToken = IERC20(underlyingtoken);

@@ -16,7 +16,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20Snapshot.sol";
 import "./Claimable.sol";
@@ -28,6 +28,7 @@ import "./ERC677.sol";
 abstract contract ERLC is ERC20KYC, ERC20Softcap, ERC20Snapshot, ERC677, Claimable
 {
     constructor(string memory name, string memory symbol, uint256 softcap, address[] memory admins, address[] memory kycadmins)
+    internal
     ERC20(name, symbol)
     ERC20Softcap(softcap)
     KYC(admins, kycadmins)

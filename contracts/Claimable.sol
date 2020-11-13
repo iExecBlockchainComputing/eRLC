@@ -16,7 +16,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -28,6 +28,7 @@ abstract contract Claimable
     {
         if (token == address(0))
         {
+            // solhint-disable-next-line avoid-low-level-calls
             (bool success,) = to.call{ value: address(this).balance }("");
             require(success, "error-claiming-eth");
         }
