@@ -19,12 +19,13 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./interfaces/IKYC.sol";
 
 
-abstract contract KYC is AccessControl
+abstract contract KYC is IKYC, AccessControl
 {
-    bytes32 public constant KYC_ADMIN_ROLE  = keccak256("KYC_ADMIN_ROLE");
-    bytes32 public constant KYC_MEMBER_ROLE = keccak256("KYC_MEMBER_ROLE");
+    bytes32 public constant override KYC_ADMIN_ROLE  = keccak256("KYC_ADMIN_ROLE");
+    bytes32 public constant override KYC_MEMBER_ROLE = keccak256("KYC_MEMBER_ROLE");
 
     modifier onlyRole(bytes32 role, address member, string memory message)
     {
@@ -47,13 +48,13 @@ abstract contract KYC is AccessControl
     }
 
     function isKYC(address account)
-    public view returns (bool)
+    public view override returns (bool)
     {
         return hasRole(KYC_MEMBER_ROLE, account);
     }
 
     function grantKYC(address[] calldata accounts)
-    external virtual
+    external virtual override
     {
         for (uint256 i = 0; i < accounts.length; ++i)
         {
@@ -62,7 +63,7 @@ abstract contract KYC is AccessControl
     }
 
     function revokeKYC(address[] calldata accounts)
-    external virtual
+    external virtual override
     {
         for (uint256 i = 0; i < accounts.length; ++i)
         {

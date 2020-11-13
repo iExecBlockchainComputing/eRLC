@@ -19,17 +19,19 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./interfaces/IERC20KYC.sol";
+import "./interfaces/IERC1404.sol";
 import "./KYC.sol";
 
 
-abstract contract ERC20KYC is ERC20, KYC
+abstract contract ERC20KYC is IERC20KYC, IERC1404, ERC20, KYC
 {
     uint8 internal constant _RESTRICTION_OK               = uint8(0);
     uint8 internal constant _RESTRICTION_MISSING_KYC_FROM = uint8(0x01);
     uint8 internal constant _RESTRICTION_MISSING_KYC_TO   = uint8(0x02);
 
     function detectTransferRestriction(address from, address to, uint256)
-    public view returns (uint8)
+    public view override returns (uint8)
     {
         // Allow non kyc to withdraw
         // if (to == address(0)) return _RESTRICTION_OK;
@@ -48,7 +50,7 @@ abstract contract ERC20KYC is ERC20, KYC
     }
 
     function messageForTransferRestriction(uint8 restrictionCode)
-    public pure returns (string memory)
+    public view override returns (string memory)
     {
         if (restrictionCode == _RESTRICTION_MISSING_KYC_FROM)
         {
