@@ -1,9 +1,21 @@
 {
-  "name": "KERC20",
-  "version": "1.0.0",
-  "license": "MIT",
-  "author": "Hadrien Croubois (@Amxx)",
+  "name": "@iexec/erlc",
+  "version": "0.0.1",
   "description": "",
+  "author": "iExec",
+  "license": "Apache-2.0",
+	"repository": {
+    "type": "git",
+    "url": "git+https://github.com/iExecBlockchainComputing/eRLC.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iExecBlockchainComputing/eRLC.git/issues"
+  },
+  "files": [
+    "/build",
+    "/contracts",
+		"/dist"
+  ],
   "scripts": {
     "clean": "rimraf build dist",
     "build:solidity": "oz compile --solc-version 0.6.12 --optimizer on",
