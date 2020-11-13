@@ -20,11 +20,10 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/IERC20KYC.sol";
-import "./interfaces/IERC1404.sol";
 import "./KYC.sol";
 
 
-abstract contract ERC20KYC is IERC20KYC, IERC1404, ERC20, KYC
+abstract contract ERC20KYC is IERC20KYC, ERC20, KYC
 {
     uint8 internal constant _RESTRICTION_OK               = uint8(0);
     uint8 internal constant _RESTRICTION_MISSING_KYC_FROM = uint8(0x01);

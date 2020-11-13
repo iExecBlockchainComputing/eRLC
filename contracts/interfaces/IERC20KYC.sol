@@ -19,9 +19,10 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./IERC1404.sol";
 import "./IKYC.sol";
 
 
-interface IERC20KYC is IKYC, IERC20
+interface IERC20KYC is IERC1404, IKYC, IERC20
 {
 }
