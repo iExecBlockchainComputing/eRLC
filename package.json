@@ -4,6 +4,7 @@
   "description": "",
   "author": "iExec",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/iExecBlockchainComputing/eRLC.git#readme",
 	"repository": {
     "type": "git",
     "url": "git+https://github.com/iExecBlockchainComputing/eRLC.git"
