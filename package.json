@@ -5,7 +5,7 @@
   "author": "iExec",
   "license": "Apache-2.0",
   "homepage": "https://github.com/iExecBlockchainComputing/eRLC.git#readme",
-	"repository": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/iExecBlockchainComputing/eRLC.git"
   },
@@ -15,7 +15,7 @@
   "files": [
     "/build",
     "/contracts",
-		"/dist"
+    "/dist"
   ],
   "scripts": {
     "clean": "rimraf build dist",
@@ -32,6 +32,7 @@
     "@openzeppelin/cli": "^2.8.2",
     "@openzeppelin/test-environment": "^0.1.6",
     "@openzeppelin/test-helpers": "^0.5.9",
+    "@truffle/hdwallet-provider": "^1.2.0",
     "chai": "^4.2.0",
     "ethers": "^5.0.19",
     "lodash": "^4.17.20",
@@ -40,6 +41,8 @@
     "rimraf": "^3.0.2",
     "rlc-faucet-contract": "^1.0.9",
     "solhint": "^3.3.2",
+    "truffle": "^5.1.53",
+    "truffle-plugin-verify": "^0.5.0",
     "typescript": "^4.0.5"
   }
 }
