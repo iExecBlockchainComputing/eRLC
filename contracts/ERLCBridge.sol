@@ -65,7 +65,49 @@ contract ERLCBridge is ERLC
         return true;
     }
 
-    // TODO
-    // mint
-    // burn
+    /*************************************************************************
+     *                          Mintable - Burnable                          *
+     *************************************************************************/
+    bytes32 public constant MINTER_ROLE  = keccak256("MINTER_ROLE");
+
+    function isMinter(address account)
+    public view returns (bool)
+    {
+        return hasRole(MINTER_ROLE, account);
+    }
+
+    function addMinter(address account)
+    public virtual
+    {
+        grantRole(MINTER_ROLE, account);
+    }
+
+    function renounceMinter()
+    public virtual
+    {
+        renounceRole(MINTER_ROLE, _msgSender());
+    }
+
+    function mint(address account, uint256 amount)
+    public virtual
+    onlyRole(MINTER_ROLE, _msgSender(), "restricted-to-admin")
+    returns (bool)
+    {
+        _mint(account, amount);
+        return true;
+    }
+
+    function burn(uint256 amount)
+    public virtual
+    {
+        _burn(_msgSender(), amount);
+    }
+
+    function burnFrom(address account, uint256 amount)
+    public virtual
+    {
+        uint256 decreasedAllowance = allowance(account, _msgSender()).sub(amount, "ERC20: burn amount exceeds allowance");
+        _approve(account, _msgSender(), decreasedAllowance);
+        _burn(account, amount);
+    }
 }
