@@ -33,7 +33,7 @@ dataSources:
         - Account
       abis:
         - name: ERC20
-          file: node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
+          file: ../node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -55,7 +55,7 @@ dataSources:
         - Account
       abis:
         - name: ERC20
-          file: node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
+          file: ../node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -77,7 +77,7 @@ dataSources:
         - Account
       abis:
         - name: AccessControl
-          file: node_modules/@openzeppelin/contracts/build/contracts/AccessControl.json
+          file: ../node_modules/@openzeppelin/contracts/build/contracts/AccessControl.json
       eventHandlers:
         - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
           handler: handleRoleAdminChanged

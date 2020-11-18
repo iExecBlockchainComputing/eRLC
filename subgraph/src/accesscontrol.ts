@@ -28,13 +28,13 @@ import {
 	AccountRole,
 	RoleGranted,
 	RoleRevoked,
-} from '../generated/schema'
+} from '../../generated/schema'
 
 import {
 	RoleAdminChanged as RoleAdminChangedEvent,
 	RoleGranted      as RoleGrantedEvent,
 	RoleRevoked      as RoleRevokedEvent,
-} from '../generated/eRLC-kyc/AccessControl'
+} from '../../generated/eRLC-kyc/AccessControl'
 
 import {
 	events,

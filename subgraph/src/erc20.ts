@@ -24,13 +24,13 @@ import {
 	Balance,
 	Transfer,
 	Approval,
-} from '../generated/schema'
+} from '../../generated/schema'
 
 import {
 	ERC20,
 	Transfer as TransferEvent,
 	Approval as ApprovalEvent,
-} from '../generated/RLC/ERC20'
+} from '../../generated/RLC/ERC20'
 
 import {
 	constants,
