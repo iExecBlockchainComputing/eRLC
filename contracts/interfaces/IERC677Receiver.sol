@@ -18,26 +18,9 @@
 
 pragma solidity ^0.6.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./interfaces/IERC677.sol";
-import "./interfaces/IERC677Receiver.sol";
 
-
-abstract contract ERC677 is IERC677, ERC20
+interface IERC677Receiver
 {
-    function approveAndCall(address spender, uint256 amount, bytes calldata extraData)
-    external virtual override returns (bool)
-    {
-        approve(spender, amount);
-        require(IERC677Receiver(spender).receiveApproval(_msgSender(), amount, address(this), extraData), "approval-refused-by-receiver");
-        return true;
-    }
-
-    function transferAndCall(address receiver, uint256 amount, bytes calldata data)
-    external virtual override returns (bool)
-    {
-        transfer(receiver, amount);
-        require(IERC677Receiver(receiver).onTokenTransfer(_msgSender(), amount, data), "transfer-refused-by-receiver");
-        return true;
-    }
+    function receiveApproval(address,uint256,address,bytes calldata) external returns (bool);
+    function onTokenTransfer(address,uint256,bytes calldata) external returns (bool);
 }
