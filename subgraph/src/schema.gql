@@ -26,6 +26,8 @@ type Balance @entity {
 	token:                        Token!
 	account:                      Account!
 	value:                        DecimalValue!
+	transfersFrom:                [Transfer!]! @derivedFrom(field: "fromBalance")
+	transfersTo:                  [Transfer!]! @derivedFrom(field: "toBalance")
 }
 
 type AccessControl @entity {
@@ -60,7 +62,9 @@ type Transfer implements Event @entity {
 	timestamp:                    BigInt!
 	token:                        Token!
 	from:                         Account!
+	fromBalance:                  Balance
 	to:                           Account!
+	toBalance:                    Balance
 	value:                        BigDecimal!
 }
 

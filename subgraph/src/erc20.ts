@@ -59,6 +59,14 @@ export function handleTransfer(event: TransferEvent): void {
 	from.save()
 	to.save()
 
+	let ev         = new Transfer(events.id(event))
+	ev.transaction = transactions.log(event).id
+	ev.timestamp   = event.block.timestamp
+	ev.token       = token.id
+	ev.from        = from.id
+	ev.to          = to.id
+	ev.value       = decimals.toDecimals(event.params.value, token.decimals)
+
 	if (from.id != constants.ADDRESS_ZERO) {
 		let id      = token.id.concat('-').concat(from.id)
 		let balance = Balance.load(id)
@@ -76,6 +84,7 @@ export function handleTransfer(event: TransferEvent): void {
 			let value = new decimals.Value(balance.id, token.decimals)
 			value.decrement(event.params.value)
 		}
+		ev.fromBalance = id;
 	}
 
 	if (to.id != constants.ADDRESS_ZERO) {
@@ -95,15 +104,8 @@ export function handleTransfer(event: TransferEvent): void {
 			let value = new decimals.Value(balance.id, token.decimals)
 			value.increment(event.params.value)
 		}
+		ev.toBalance = id;
 	}
-
-	let ev         = new Transfer(events.id(event))
-	ev.transaction = transactions.log(event).id
-	ev.timestamp   = event.block.timestamp
-	ev.token       = token.id
-	ev.from        = from.id
-	ev.to          = to.id
-	ev.value       = decimals.toDecimals(event.params.value, token.decimals)
 	ev.save()
 }
 
