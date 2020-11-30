@@ -71,18 +71,50 @@ describe("ERLCTokenSwap", async function () {
           await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from, value: this.value });
 
           expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+          expect(await web3.eth.getBalance(this.erlc.address)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
         });
 
         it("receive", async function () {
-          // TODO
-          // const from  = kycuser1;
-          //
-          // expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
-          //
-          // const { tx } = await this.erlc.deposit({ from, value: this.value.mul(this.conversionrate) });
-          // await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from, value: this.value });
-          //
-          // expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+          const from  = kycuser1;
+
+          await web3.eth.sendTransaction({ from, to: this.erlc.address, value: this.value.mul(this.conversionrate), gas: 1000000 });
+
+          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+          expect(await web3.eth.getBalance(this.erlc.address)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
+        });
+
+        it("no leftover", async function () {
+          const from  = kycuser1;
+
+          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
+
+          const balanceBefore = new BN(await web3.eth.getBalance(from));
+
+          const { tx } = await this.erlc.deposit({ from, value: this.value.mul(this.conversionrate), gasPrice: 0 });
+          await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from, value: this.value });
+
+          const balanceAfter = new BN(await web3.eth.getBalance(from));
+
+          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+          expect(await web3.eth.getBalance(this.erlc.address)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
+          expect(balanceBefore.sub(balanceAfter)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
+        });
+
+        it("with leftover", async function () {
+          const from  = kycuser1;
+
+          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
+
+          const balanceBefore = new BN(await web3.eth.getBalance(from));
+
+          const { tx } = await this.erlc.deposit({ from, value: this.value.mul(this.conversionrate).add(new BN("133742")), gasPrice: 0 });
+          await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from, value: this.value });
+
+          const balanceAfter = new BN(await web3.eth.getBalance(from));
+
+          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+          expect(await web3.eth.getBalance(this.erlc.address)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
+          expect(balanceBefore.sub(balanceAfter)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
         });
       });
     });
@@ -114,10 +146,15 @@ describe("ERLCTokenSwap", async function () {
 
         expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
 
-        const { tx } = await this.erlc.withdraw(this.value, { from })
+        const balanceBefore = new BN(await web3.eth.getBalance(from));
+
+        const { tx } = await this.erlc.withdraw(this.value, { from, gasPrice: 0 });
         await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: from, to: constants.ZERO_ADDRESS, value: this.value });
 
+        const balanceAfter = new BN(await web3.eth.getBalance(from));
+
         expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
+        expect(balanceAfter.sub(balanceBefore)).to.be.bignumber.equal(this.value.mul(this.conversionrate));
       });
 
       it("without kyc", async function () {
@@ -159,7 +196,7 @@ describe("ERLCTokenSwap", async function () {
       it("claim - denied access", async function () {
         await expectRevert(this.erlc.claim(this.rlc.address, kycuser1, { from: kycuser1 }), "only-admin");
       });
-    })
+    });
   });
 
   describe("snapshots", async function () {

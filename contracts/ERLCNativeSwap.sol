@@ -49,12 +49,6 @@ contract ERLCNativeSwap is ERLC
         deposit();
     }
 
-    fallback()
-    external payable
-    {
-        deposit();
-    }
-
     function deposit()
     public payable
     {

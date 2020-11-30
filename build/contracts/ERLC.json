@@ -982,11 +982,11 @@
           2527,
           2585,
           2665,
-          3385,
-          3406,
-          3418,
-          3443,
-          3502
+          3378,
+          3399,
+          3411,
+          3436,
+          3495
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -999,15 +999,15 @@
           1395,
           2585,
           2527,
-          3385,
+          3378,
           305,
           1077,
-          3418,
+          3411,
           1473,
           22,
-          3443,
-          3502,
-          3406
+          3436,
+          3495,
+          3399
         ],
         "name": "ERLC",
         "nodeType": "ContractDefinition",
@@ -1139,10 +1139,10 @@
                   "name": "KYC",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3385,
+                  "referencedDeclaration": 3378,
                   "src": "1716:3:15",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_type$_t_contract$_KYC_$3385_$",
+                    "typeIdentifier": "t_type$_t_contract$_KYC_$3378_$",
                     "typeString": "type(contract KYC)"
                   }
                 },
@@ -1492,7 +1492,7 @@
                   "name": "onlyRole",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3259,
+                  "referencedDeclaration": 3252,
                   "src": "2054:8:15",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_bytes32_$_t_address_$_t_string_memory_ptr_$",
@@ -1706,7 +1706,7 @@
                   "name": "onlyRole",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 3259,
+                  "referencedDeclaration": 3252,
                   "src": "2207:8:15",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$_t_bytes32_$_t_address_$_t_string_memory_ptr_$",

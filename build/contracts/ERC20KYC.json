@@ -663,7 +663,7 @@
         "id": 2391,
         "nodeType": "ImportDirective",
         "scope": 2528,
-        "sourceUnit": 3419,
+        "sourceUnit": 3412,
         "src": "1323:36:12",
         "symbolAliases": [],
         "unitAlias": ""
@@ -674,7 +674,7 @@
         "id": 2392,
         "nodeType": "ImportDirective",
         "scope": 2528,
-        "sourceUnit": 3386,
+        "sourceUnit": 3379,
         "src": "1360:19:12",
         "symbolAliases": [],
         "unitAlias": ""
@@ -689,10 +689,10 @@
               "id": 2393,
               "name": "IERC20KYC",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3418,
+              "referencedDeclaration": 3411,
               "src": "1412:9:12",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20KYC_$3418",
+                "typeIdentifier": "t_contract$_IERC20KYC_$3411",
                 "typeString": "contract IERC20KYC"
               }
             },
@@ -725,10 +725,10 @@
               "id": 2397,
               "name": "KYC",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3385,
+              "referencedDeclaration": 3378,
               "src": "1430:3:12",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_KYC_$3385",
+                "typeIdentifier": "t_contract$_KYC_$3378",
                 "typeString": "contract KYC"
               }
             },
@@ -742,10 +742,10 @@
           305,
           1077,
           1473,
-          3385,
-          3406,
-          3418,
-          3502
+          3378,
+          3399,
+          3411,
+          3495
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -753,14 +753,14 @@
         "id": 2527,
         "linearizedBaseContracts": [
           2527,
-          3385,
+          3378,
           305,
           1077,
-          3418,
+          3411,
           1473,
           22,
-          3502,
-          3406
+          3495,
+          3399
         ],
         "name": "ERC20KYC",
         "nodeType": "ContractDefinition",
@@ -1046,7 +1046,7 @@
           },
           {
             "baseFunctions": [
-              3398
+              3391
             ],
             "body": {
               "id": 2460,
@@ -1204,7 +1204,7 @@
                           "name": "isKYC",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3328,
+                          "referencedDeclaration": 3321,
                           "src": "1950:5:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
@@ -1419,7 +1419,7 @@
                           "name": "isKYC",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3328,
+                          "referencedDeclaration": 3321,
                           "src": "2114:5:12",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
@@ -1654,7 +1654,7 @@
           },
           {
             "baseFunctions": [
-              3405
+              3398
             ],
             "body": {
               "id": 2487,

@@ -313,15 +313,15 @@
     "absolutePath": "contracts/interfaces/IERC20KYC.sol",
     "exportedSymbols": {
       "IERC20KYC": [
-        3418
+        3411
       ]
     },
-    "id": 3419,
+    "id": 3412,
     "license": "Apache-2.0",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3408,
+        "id": 3401,
         "literals": [
           "solidity",
           "^",
@@ -334,9 +334,9 @@
       {
         "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "id": 3409,
+        "id": 3402,
         "nodeType": "ImportDirective",
-        "scope": 3419,
+        "scope": 3412,
         "sourceUnit": 1474,
         "src": "1267:56:20",
         "symbolAliases": [],
@@ -345,10 +345,10 @@
       {
         "absolutePath": "contracts/interfaces/IERC1404.sol",
         "file": "./IERC1404.sol",
-        "id": 3410,
+        "id": 3403,
         "nodeType": "ImportDirective",
-        "scope": 3419,
-        "sourceUnit": 3407,
+        "scope": 3412,
+        "sourceUnit": 3400,
         "src": "1324:24:20",
         "symbolAliases": [],
         "unitAlias": ""
@@ -356,10 +356,10 @@
       {
         "absolutePath": "contracts/interfaces/IKYC.sol",
         "file": "./IKYC.sol",
-        "id": 3411,
+        "id": 3404,
         "nodeType": "ImportDirective",
-        "scope": 3419,
-        "sourceUnit": 3503,
+        "scope": 3412,
+        "sourceUnit": 3496,
         "src": "1349:20:20",
         "symbolAliases": [],
         "unitAlias": ""
@@ -371,17 +371,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3412,
+              "id": 3405,
               "name": "IERC1404",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3406,
+              "referencedDeclaration": 3399,
               "src": "1395:8:20",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC1404_$3406",
+                "typeIdentifier": "t_contract$_IERC1404_$3399",
                 "typeString": "contract IERC1404"
               }
             },
-            "id": 3413,
+            "id": 3406,
             "nodeType": "InheritanceSpecifier",
             "src": "1395:8:20"
           },
@@ -389,17 +389,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3414,
+              "id": 3407,
               "name": "IKYC",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3502,
+              "referencedDeclaration": 3495,
               "src": "1405:4:20",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IKYC_$3502",
+                "typeIdentifier": "t_contract$_IKYC_$3495",
                 "typeString": "contract IKYC"
               }
             },
-            "id": 3415,
+            "id": 3408,
             "nodeType": "InheritanceSpecifier",
             "src": "1405:4:20"
           },
@@ -407,7 +407,7 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3416,
+              "id": 3409,
               "name": "IERC20",
               "nodeType": "UserDefinedTypeName",
               "referencedDeclaration": 1473,
@@ -417,30 +417,30 @@
                 "typeString": "contract IERC20"
               }
             },
-            "id": 3417,
+            "id": 3410,
             "nodeType": "InheritanceSpecifier",
             "src": "1411:6:20"
           }
         ],
         "contractDependencies": [
           1473,
-          3406,
-          3502
+          3399,
+          3495
         ],
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 3418,
+        "id": 3411,
         "linearizedBaseContracts": [
-          3418,
+          3411,
           1473,
-          3502,
-          3406
+          3495,
+          3399
         ],
         "name": "IERC20KYC",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 3419,
+        "scope": 3412,
         "src": "1372:49:20"
       }
     ],
