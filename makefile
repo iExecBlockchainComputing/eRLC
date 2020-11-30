@@ -1,5 +1,5 @@
 # MINIFICATION
-JQN       = jqn
+JQN       = npx jqn
 PATH_MAIN = ./build/contracts/
 PATH_MIN  = ./build/contracts-min/
 OBJECTS   = $(patsubst $(PATH_MAIN)%.json, %, $(wildcard $(PATH_MAIN)*.json))

@@ -5,17 +5,17 @@ const { expect } = require("chai");
 
 const { abi, bytecode } = require ("rlc-faucet-contract/build/contracts/RLC.json");
 const RLC      = contract.fromABI(abi, bytecode);
-const ERLCSwap = contract.fromArtifact("ERLCSwap");
+const ERLCSwap = contract.fromArtifact("ERLCNativeSwap");
 
-describe("ERLCSwap", async function () {
+describe("ERLCTokenSwap", async function () {
   const [ admin, kycadmin, kycuser1, kycuser2, user1, user2, other1, other2 ] = accounts;
 
   beforeEach(async function () {
     this.rlc  = await RLC.new({ from: admin });
     this.erlc = await ERLCSwap.new(
-      this.rlc.address,
       "iExec KRLC Token", // name
       "KRLC",             // symbol
+      9,                  // decimals
       0,                  // softcap
       [ admin ],          // admins
       [ kycadmin ],       // kycadmins
@@ -26,9 +26,10 @@ describe("ERLCSwap", async function () {
       DEFAULT_ADMIN_ROLE: await this.erlc.DEFAULT_ADMIN_ROLE(),
       KYC_ADMIN_ROLE:     await this.erlc.KYC_ADMIN_ROLE(),
       KYC_MEMBER_ROLE:    await this.erlc.KYC_MEMBER_ROLE(),
-    }
+    };
 
-    this.value = new BN("1000");
+    this.conversionrate = await this.erlc.ConversionRate();
+    this.value          = new BN("1000");
 
     await Promise.all(
       [ kycuser1, kycuser2, user1, user2 ]
@@ -54,62 +55,41 @@ describe("ERLCSwap", async function () {
 
   describe("token movements", async function () {
     describe("deposit", async function () {
-      describe("2-steps", async function () {
-        it("missing approve", async function () {
-          const from  = kycuser1;
-
-          await expectRevert.unspecified(this.erlc.deposit(this.value, { from }));
-        });
-
-        it("missing kyc", async function () {
-          const from  = user1;
-
-          await this.rlc.approve(this.erlc.address, this.value, { from });
-          await expectRevert(this.erlc.deposit(this.value, { from }), "Receiver is missing KYC");
-        });
-
-        it("with kyc", async function () {
-          const from  = kycuser1;
-
-          expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal(this.value);
-          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
-
-          await this.rlc.approve(this.erlc.address, this.value, { from });
-          const { tx } = await this.erlc.deposit(this.value, { from });
-          await expectEvent.inTransaction(tx, this.rlc,  "Transfer", { from: from,                   to: this.erlc.address, value: this.value });
-          await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from,              value: this.value });
-
-          expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal("0");
-          expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
-        });
-      });
-
       describe("1-steps", async function () {
         it("missing kyc", async function () {
           const from  = user1;
 
-          await expectRevert(this.rlc.approveAndCall(this.erlc.address, this.value, this.erlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from }), "Receiver is missing KYC");
+          await expectRevert(this.erlc.deposit({ from, value: this.value.mul(this.conversionrate) }), "Receiver is missing KYC");
         });
 
         it("with kyc", async function () {
           const from  = kycuser1;
 
-          expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal(this.value);
           expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
 
-          const { tx } = await this.rlc.approveAndCall(this.erlc.address, this.value, this.erlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from });
-          await expectEvent.inTransaction(tx, this.rlc,  "Transfer", { from: from,                   to: this.erlc.address, value: this.value });
-          await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from,              value: this.value });
+          const { tx } = await this.erlc.deposit({ from, value: this.value.mul(this.conversionrate) });
+          await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from, value: this.value });
 
-          expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal("0");
           expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
+        });
+
+        it("receive", async function () {
+          // TODO
+          // const from  = kycuser1;
+          //
+          // expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
+          //
+          // const { tx } = await this.erlc.deposit({ from, value: this.value.mul(this.conversionrate) });
+          // await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: from, value: this.value });
+          //
+          // expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
         });
       });
     });
 
     describe("transfer", async function () {
       beforeEach(async function () {
-        await this.rlc.approveAndCall(this.erlc.address, this.value, this.erlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from: kycuser1 });
+        await this.erlc.deposit({ from: kycuser1, value: this.value.mul(this.conversionrate) });
       });
 
       it("from missing kyc", async function () {
@@ -126,27 +106,23 @@ describe("ERLCSwap", async function () {
 
     describe("withdraw", async function () {
       beforeEach(async function () {
-        await this.rlc.approveAndCall(this.erlc.address, this.value, this.erlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from: kycuser1 });
+        await this.erlc.deposit({ from: kycuser1, value: this.value.mul(this.conversionrate) });
       });
 
       it("with kyc", async function () {
         const from = kycuser1;
 
-        expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal("0");
         expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
 
         const { tx } = await this.erlc.withdraw(this.value, { from })
-        await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: from,              to: constants.ZERO_ADDRESS, value: this.value });
-        await expectEvent.inTransaction(tx, this.rlc,  "Transfer", { from: this.erlc.address, to: from,                   value: this.value });
+        await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: from, to: constants.ZERO_ADDRESS, value: this.value });
 
-        expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal(this.value);
         expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
       });
 
       it("without kyc", async function () {
         const from = kycuser1;
 
-        expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal("0");
         expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal(this.value);
 
         await this.erlc.revokeRole(this.roles.KYC_MEMBER_ROLE, from, { from: kycadmin });
@@ -154,10 +130,8 @@ describe("ERLCSwap", async function () {
         await expectRevert(this.erlc.withdraw(this.value, { from }), "Sender is missing KYC");
 
         // const { tx } = await this.erlc.withdraw(this.value, { from })
-        // await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: from,              to: constants.ZERO_ADDRESS, value: this.value });
         // await expectEvent.inTransaction(tx, this.rlc,  "Transfer", { from: this.erlc.address, to: from,                   value: this.value });
 
-        // expect(await this.rlc.balanceOf(from)).to.be.bignumber.equal(this.value);
         // expect(await this.erlc.balanceOf(from)).to.be.bignumber.equal("0");
       });
     });
@@ -170,16 +144,25 @@ describe("ERLCSwap", async function () {
 
       it("recover", async function () {
         const { tx } = await this.erlc.recover({ from: admin });
-        await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: admin, value: this.value });
+        await expectEvent.inTransaction(tx, this.erlc, "Transfer", { from: constants.ZERO_ADDRESS, to: admin, value: new BN(0) });
       });
 
-      it("recover", async function () {
-        await expectRevert(this.erlc.claim(this.rlc.address, admin, { from: admin }), "cannot-claim-underlying-token");
+      it("claim - working", async function () {
+        const { tx } = await this.erlc.claim(this.rlc.address, admin, { from: admin });
+        await expectEvent.inTransaction(tx, this.rlc, "Transfer", { from: this.erlc.address, to: admin, value: this.value });
+      });
+
+      it("recover - denied access", async function () {
+        await expectRevert(this.erlc.recover({ from: kycuser1 }), "only-admin");
+      });
+
+      it("claim - denied access", async function () {
+        await expectRevert(this.erlc.claim(this.rlc.address, kycuser1, { from: kycuser1 }), "only-admin");
       });
     })
   });
 
-  false && describe("snapshots", async function () {
+  describe("snapshots", async function () {
     it("without snapshot", async function () {
       expect(await this.erlc.totalSupply()).to.be.bignumber.equal("0");
       await expectRevert(this.erlc.totalSupplyAt(0), "ERC20Snapshot: id is 0");
@@ -202,7 +185,7 @@ describe("ERLCSwap", async function () {
 
       describe("with deposit", async function () {
         beforeEach(async function () {
-          await this.rlc.approveAndCall(this.erlc.address, this.value, this.erlc.contract.methods.deposit(this.value.toString()).encodeABI(), { from: kycuser1 });
+          await this.erlc.deposit({ from: kycuser1, value: this.value.mul(this.conversionrate) });
         });
 
         it("check", async function () {
@@ -237,7 +220,7 @@ describe("ERLCSwap", async function () {
     }
   }
 
-  false && describe("role management", async function () {
+  describe("role management", async function () {
     describe("role: kyc member", async function () {
       describe("grant", async function () {
         it("by default admin - no", async function () { await checkRoleChange(this.erlc, this.roles.KYC_MEMBER_ROLE, other2, admin,    "grantRole")                });

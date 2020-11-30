@@ -22,87 +22,67 @@ import "./interfaces/IERC677.sol";
 import "./ERLC.sol";
 
 
-contract ERLCSwap is ERLC, IERC677Receiver
+contract ERLCNativeSwap is ERLC
 {
-    IERC20 public immutable underlyingToken;
+    uint256 public ConversionRate;
 
     constructor(
-        address          underlyingtoken,
         string    memory name,
         string    memory symbol,
+        uint8            decimals,
         uint256          softcap,
         address[] memory admins,
         address[] memory kycadmins)
     public
     ERLC(name, symbol, softcap, admins, kycadmins)
     {
-        underlyingToken = IERC20(underlyingtoken);
-        _setupDecimals(ERC20(underlyingtoken).decimals());
+        ConversionRate = 10 ** SafeMath.sub(18, decimals);
+        _setupDecimals(decimals);
     }
 
     /*************************************************************************
      *                       Escrow - public interface                       *
      *************************************************************************/
-    function deposit(uint256 amount)
-    public
+    receive()
+    external payable
     {
-        _deposit(_msgSender(), amount);
-        _mint(_msgSender(), amount);
+        deposit();
+    }
+
+    fallback()
+    external payable
+    {
+        deposit();
+    }
+
+    function deposit()
+    public payable
+    {
+        _mint(_msgSender(), msg.value.div(ConversionRate));
+        Address.sendValue(_msgSender(), msg.value.mod(ConversionRate));
     }
 
     function withdraw(uint256 amount)
     public
     {
         _burn(_msgSender(), amount);
-        _withdraw(_msgSender(), amount);
+        Address.sendValue(_msgSender(), amount.mul(ConversionRate));
     }
 
     function recover()
     public
     onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "only-admin")
     {
-        _mint(_msgSender(), SafeMath.sub(underlyingToken.balanceOf(address(this)), totalSupply()));
+        uint256 delta = address(this).balance.sub(totalSupply().mul(ConversionRate));
+
+        _mint(_msgSender(), delta.div(ConversionRate));
+        Address.sendValue(_msgSender(), delta.mod(ConversionRate));
     }
 
     function claim(address token, address to)
     public virtual override
+    onlyRole(DEFAULT_ADMIN_ROLE, _msgSender(), "only-admin")
     {
-        require(token != address(underlyingToken), "cannot-claim-underlying-token");
         super.claim(token, to);
-    }
-
-    /*************************************************************************
-     *            ERC677Receiver - One-transaction ERC20 deposits            *
-     *************************************************************************/
-    function receiveApproval(address sender, uint256 amount, address token, bytes calldata)
-    public override returns (bool)
-    {
-        require(token == address(underlyingToken), "wrong-token");
-        _deposit(sender, amount);
-        _mint(sender, amount);
-        return true;
-    }
-
-    function onTokenTransfer(address sender, uint256 amount, bytes calldata)
-    public override returns (bool)
-    {
-        require(_msgSender() == address(underlyingToken), "wrong-sender");
-        _mint(sender, amount);
-        return true;
-    }
-
-    /*************************************************************************
-     *                      Escrow - internal functions                      *
-     *************************************************************************/
-    function _deposit(address from, uint256 amount)
-    internal
-    {
-        require(underlyingToken.transferFrom(from, address(this), amount), "failed-transferFrom");
-    }
-
-    function _withdraw(address to, uint256 amount)
-    internal
-    {
-        require(underlyingToken.transfer(to, amount), "failed-transfer");
     }
 }

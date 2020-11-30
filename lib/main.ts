@@ -39,7 +39,7 @@ const privatekey: string = process.env.MNEMONIC;
 				})
 				.catch(reject);
 			}),
-			null
+			Promise.resolve(null)
 		).then(() => console.log(`Processed ${entries.length} addresses`));
 	});
 
