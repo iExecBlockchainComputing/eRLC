@@ -18,8 +18,8 @@
 
 pragma solidity ^0.6.0;
 
-import "./interfaces/IERC677.sol";
-import "./ERLC.sol";
+import "../interfaces/IERC677.sol";
+import "../ERLC.sol";
 
 
 contract ERLCNativeSwap is ERLC
