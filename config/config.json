@@ -1,11 +1,11 @@
 {
 	"chains":
 	{
-		"1":       { "token": "0x607F4C5BB672230e8672085532f7e901544a7375" },
-		"3":       { "token": "0x7314Dc4d7794b5E7894212CA1556ae8e3De58621" },
-		"4":       { "token": "0xf1e6Ad3a7eF0c86c915F0feDF80eD851809bEA90" },
-		"5":       { "token": "0xe0d00540a3729B4fdB96f92534dA97DC7973Af8b" },
-		"42":      { "token": "0xc57538846Ec405Ea25Deb00e0f9B29a432D53507" },
+		"1":       { "token": "0x607F4C5BB672230e8672085532f7e901544a7375", "softcap": 400000e9 },
+		"3":       { "token": "0x7314Dc4d7794b5E7894212CA1556ae8e3De58621", "softcap": 0        },
+		"4":       { "token": "0xf1e6Ad3a7eF0c86c915F0feDF80eD851809bEA90", "softcap": 0        },
+		"5":       { "token": "0xe0d00540a3729B4fdB96f92534dA97DC7973Af8b", "softcap": 0        },
+		"42":      { "token": "0xc57538846Ec405Ea25Deb00e0f9B29a432D53507", "softcap": 0        },
 		"133":     {},
 		"134":     {},
 		"default": {}
