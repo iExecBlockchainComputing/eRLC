@@ -62,8 +62,9 @@ class EthersDeployer
 		await this.ready();
 		console.log(`[factoryDeployer] ${artefact.contractName}`);
 		const constructorABI   = artefact.abi.find(e => e.type == 'constructor');
-		const args             = extra.slice(0, constructorABI.inputs.length);
-		const options          = { ...this.options, ...extra[constructorABI.inputs.length] };
+		const argsCount        = constructorABI ? constructorABI.inputs.length : 0;
+		const args             = extra.slice(0, argsCount);
+		const options          = { ...this.options, ...extra[argsCount] };
 		const libraryAddresses = await Promise.all(
 			(options.libraries || [])
 			.filter(({ contractName }) => artefact.bytecode.search(contractName) != -1)
