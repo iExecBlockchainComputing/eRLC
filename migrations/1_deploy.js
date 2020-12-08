@@ -19,9 +19,10 @@ const CONFIG = require('../config/config.json')
 // FactoryDeployer
 const { TruffleDeployer } = require('../utils/FactoryDeployer')
 // Token
-var ERLCTokenSwap  = artifacts.require('ERLCTokenSwap')
-var ERLCNativeSwap = artifacts.require('ERLCNativeSwap')
-var ERLCBridge     = artifacts.require('ERLCBridge')
+const RLC            = artifacts.require('rlc-faucet-contract/RLC')
+const ERLCTokenSwap  = artifacts.require('ERLCTokenSwap')
+const ERLCNativeSwap = artifacts.require('ERLCNativeSwap')
+const ERLCBridge     = artifacts.require('ERLCBridge')
 
 /*****************************************************************************
  *                                   Main                                    *
@@ -35,19 +36,41 @@ module.exports = async function(deployer, network, accounts)
 	console.log('Chaintype is:', chaintype);
 	console.log('Deployer is:', accounts[0]);
 
-	const { token, decimals, softcap } = CONFIG.chains[chainid] || CONFIG.chains.default;
+	const { asset, token, decimals, softcap } = CONFIG.chains[chainid] || CONFIG.chains.default;
 	if (process.env.SALT)
 	{
 		deployer = new TruffleDeployer(web3, accounts[0], { salt: process.env.SALT });
 	}
-	if (token)
+
+	switch (asset)
 	{
-		await deployer.deploy(ERLCTokenSwap, token, 'iExec eRLC Token', 'eRLC', softcap || 0, [ accounts[0] ], []);
-	}
-	else
-	{
-		throw "Native & Bridge options not available yet";
-		// await deployer.deploy(ERLCBridge,     'iExec eRLC Token', 'eRLC', decimals, softcap, [ accounts[0] ], []);
-		// await deployer.deploy(ERLCNativeSwap, 'iExec eRLC Token', 'eRLC', decimals, softcap, [ accounts[0] ], []);
+		case "Token":
+			if (token)
+			{
+				RLC.address = token;
+			}
+			else
+			{
+				RLC.isDeployed() || await deployer.deploy(RLC);
+			}
+			await deployer.deploy(
+				ERLCTokenSwap,
+				(await RLC.deployed()).address,
+				'iExec eRLC Token',
+				'eRLC',
+				softcap || 0,
+				[ accounts[0] ],
+				[]
+			);
+			break;
+
+		case "Native":
+			throw "Native & Bridge options not available yet";
+			// await deployer.deploy(ERLCBridge,     'iExec eRLC Token', 'eRLC', decimals, softcap, [ accounts[0] ], []);
+			// await deployer.deploy(ERLCNativeSwap, 'iExec eRLC Token', 'eRLC', decimals, softcap, [ accounts[0] ], []);
+			break;
+
+		default:
+			throw `Unsuported asset type: ${asset}`;
 	}
 };
