@@ -60,14 +60,34 @@ module.exports = async function(deployer, network, accounts)
 				'eRLC',
 				softcap || 0,
 				[ accounts[0] ],
-				[]
+				[],
 			);
 			break;
 
 		case "Native":
-			throw "Native & Bridge options not available yet";
-			// await deployer.deploy(ERLCBridge,     'iExec eRLC Token', 'eRLC', decimals, softcap, [ accounts[0] ], []);
-			// await deployer.deploy(ERLCNativeSwap, 'iExec eRLC Token', 'eRLC', decimals, softcap, [ accounts[0] ], []);
+			throw "Native options not available yet";
+			// await deployer.deploy(
+			// 	ERLCNativeSwap,
+			// 	'iExec eRLC Token',
+			// 	'eRLC',
+			// 	decimals || 18,
+			// 	softcap || 0,
+			// 	[ accounts[0] ],
+			// 	[],
+			// );
+			break;
+
+		case "Bridge":
+			throw "Bridge options not available yet";
+			// await deployer.deploy(
+			// 	ERLCBridge,
+			// 	'iExec eRLC Token',
+			// 	'eRLC',
+			// 	decimals || 18,
+			// 	softcap || 0,
+			// 	[ accounts[0] ],
+			// 	[],
+			// );
 			break;
 
 		default:
