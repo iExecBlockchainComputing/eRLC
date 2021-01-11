@@ -302,5 +302,6 @@
       "stateMutability": "nonpayable",
       "type": "function"
     }
-  ]
+  ],
+  "networks": {}
 }

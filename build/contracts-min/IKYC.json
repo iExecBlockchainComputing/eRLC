@@ -29,19 +29,6 @@
     {
       "inputs": [
         {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "name": "grantKYC",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "",
           "type": "address"
@@ -66,10 +53,24 @@
           "type": "address[]"
         }
       ],
+      "name": "grantKYC",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
       "name": "revokeKYC",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     }
-  ]
+  ],
+  "networks": {}
 }

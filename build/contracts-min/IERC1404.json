@@ -48,5 +48,6 @@
       "stateMutability": "view",
       "type": "function"
     }
-  ]
+  ],
+  "networks": {}
 }

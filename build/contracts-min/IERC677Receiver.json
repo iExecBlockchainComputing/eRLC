@@ -13,12 +13,17 @@
           "type": "uint256"
         },
         {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
           "internalType": "bytes",
           "name": "",
           "type": "bytes"
         }
       ],
-      "name": "onTokenTransfer",
+      "name": "receiveApproval",
       "outputs": [
         {
           "internalType": "bool",
@@ -42,17 +47,12 @@
           "type": "uint256"
         },
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
           "internalType": "bytes",
           "name": "",
           "type": "bytes"
         }
       ],
-      "name": "receiveApproval",
+      "name": "onTokenTransfer",
       "outputs": [
         {
           "internalType": "bool",
@@ -63,5 +63,6 @@
       "stateMutability": "nonpayable",
       "type": "function"
     }
-  ]
+  ],
+  "networks": {}
 }
